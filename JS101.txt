@@ -1,0 +1,519 @@
+/**
+ * Global Scope
+ *  - function or var is global then it can be accessed from anywhere
+ *    within a program
+ *  - A variable declared outside a function will exists on the global
+ *    object (Obj Tree)
+ *  - In the browser the global scope is the window object
+ */
+var a = 9; // window.a -> 9
+function foo(){} // window.foo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Local Scope
+ * - inside each function body
+ */
+function foo() {
+    var x = 5;
+}
+
+console.log(x); // ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function myFunc() {
+    var x = 5;
+}
+myFunc();
+console.log(x); // ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Functions have access to variables defined in the same scope.
+ */
+var foo = "hello";
+var sayHello = function() {
+    console.log( foo );
+};
+sayHello(); // ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Inner + outer functions
+ */
+function outer() {
+    var x = 5;
+
+    function inner() {
+        console.log(x);
+    }
+
+    inner(); // -> 5
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function outer() {
+    var x = 5;
+
+    function inner() {
+        console.log(x);
+        var y = 10;
+    }
+
+    inner(); //-> 5
+
+    console.log(y); //-> undefined
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Functions in the wild
+ */
+
+// 1. Assigning functions to variables
+var foo = function (){};
+
+// 2. Anonymous function
+appAPI.request.get("google", function (result){
+
+};)
+
+// 3. Self invoking function (Why is this good?)
+var appAPI = {};
+
+(   function ()
+	{
+		var _foo = function (a,b,c,d){....... };
+
+		appAPI.foo = function (a,b){
+			_foo(a,b,new Date(), Math.random())
+		}
+		console.log("hello world");
+	}()
+);
+
+appAPI.foo(1,2);
+
+
+
+
+
+
+
+
+
+
+// 4. function as constructor
+function Car(model){
+	this.model = model;
+	this.getModel = function (){ return this.model; };
+}
+
+var mazdaCar = new Car("Mazda");
+var volvoCar = new Car("Volvo");
+
+console.log(mazdaCar.getModel());
+console.log(volvoCar.getModel());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// On A Side Note What Is new/this?
+function Car(model){
+	this.model = model;
+	this.getModel = function (){ return this.model; };
+
+	return this;
+}
+// this = the execution scope
+// What will happen if we just call the function?
+var mazdaCar = Car("Volvo");
+
+// New = return this + setting this to a new obj
+// New equivalent
+var mazdaCar = Car.call({}, "Mazda");
+
+console.log(mazdaCar.getModel());
+
+
+
+
+
+
+
+
+
+
+
+
+// 5. function as a factory
+function Car(model){
+	var _a = 9;
+	return {model: model, getModel: function (){ return _a; } };
+}
+
+var volvoCar = new Car("Volvo"); // Do we need the new ?
+console.log(volvoCar.getModel());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Closure
+ * "Closures are an extension of the concept of scope.
+ *  With closures, functions have access to variables that were
+ *  available in the scope where the function was created."
+ *
+ *  - example blank.html
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 1.
+function mul(a, b) {
+	return a * b;
+}
+
+console.log(mul(4, 5)); // ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 2. A C style reusing - simple 'Fix' function
+function mulByTwo(a){
+	return mul(a, 2);
+}
+
+console.log(mulByTwo(3)); // ->
+
+// What will happen if we want to have mulByThree?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 3. The JS way - a generic 'Fix' function ("fanctor")
+function mulFunctor(a){
+	return function (b){
+		return a * b;
+	};
+}
+
+var mulByTwo = mulFunctor(2);
+var mulByThree = mulFunctor(3);
+
+console.log(mulByTwo(3)); // ->
+console.log(mulByThree(4)); // ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * How can it solve our original problem?
+ */
+for (var i = 1; i < 5; i++){
+	var button = document.getElementById('button' + i);
+	button.addEventListener('click', 
+		(function (j)
+		{
+			return function (){alert(j);};
+		}(i)) );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Async programing
+ *  - Only single thread (web workers)
+ *  - Event queue
+ *  - Don't block the UI thread
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 1. Event queue in action
+
+console.log("before");
+
+setTimeout(function (){
+	console.log("hello");
+}, 1000 * 3);
+
+console.log("after");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 2. No Thread is opened!
+
+console.log("before");
+
+setTimeout(function (){
+	console.log("hello");
+}, 1000 * 3);
+
+while (true) {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//3. Whats up with 'this' ?
+
+var Car = function {
+	model: "Volvo",
+	getModel: function (){
+		setTimeout(function (){
+			console.log(this, this.model);
+		}, 1000 * 3);
+	}
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Lets use closure
+
+var Car = {
+	model: "Volvo",
+	getModel: function (){
+		var that = this;
+		setTimeout(function (){
+			console.log(that.model);
+		}, 1000 * 3);
+	}
+};
